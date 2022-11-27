@@ -8,11 +8,11 @@ export default function signUp(req, res) {
         console.log(validation)
         if(validation.error)
             return res.status(422).send(validation.error.message);
+        console.log(user)
         usersCollection.insertOne(user);
         res.send("OK")
     }
     catch(e) {
-        console.log("Oi")
         res.status(500).send(e.message);
     }
 }
