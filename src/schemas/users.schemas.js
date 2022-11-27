@@ -8,4 +8,13 @@ const newUserSchema = Joi.object({
     "profilePicture": Joi.any().required()
 });
 
-export default newUserSchema;
+const userSchema = Joi.object({
+    "email": Joi.string().email().required(),
+    "password": Joi.string().required(),
+    "keepLogged": Joi.bool().required()
+});
+
+export {
+    userSchema,
+    newUserSchema
+}
