@@ -1,5 +1,6 @@
 import { ObjectID } from "bson";
 import { application } from "express";
+import productsSchemas from "../schemas/products.schemas.js";
 import { productsCollection, usersCollection } from "../database/db.js";
 
 export async function getProducts(req, res) {
@@ -28,7 +29,6 @@ export async function getCategory(req, res) {
             return res.send(products)
 
         search = search.toLowerCase();
-        console.log(search)
 
         const sendProducts = products.filter(value => value.name.toLowerCase().indexOf(search) > -1)
         res.send(sendProducts);
@@ -44,6 +44,10 @@ export async function addToCart(req, res) {
         
         const productId = req.params.id;
         const details = req.body;
+        const validation = productsSchemas.validate(details);
+        if(validation.error)
+            return res.status(422).send("Corpo do body inválido");
+
         const user = res.locals.user;
 
         const requiredProduct = await productsCollection.findOne({_id : ObjectID(productId)});

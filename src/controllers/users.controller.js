@@ -16,10 +16,8 @@ export async function signUp(req, res) {
             ...req.body,
             "profilePicture": req.file
         };
-        console.log(req);
 
         const validation = newUserSchema.validate(user);        
-        console.log(user);
         if(validation.error)
             return res.status(422).send(validation.error.message);
     
@@ -69,7 +67,6 @@ export async function signIn(req, res) {
 export async function getCart(req, res) {
     try {
         const user = res.locals.user;
-        console.log(user)
         res.send(user.cart);
     }
     catch(e) {
@@ -82,7 +79,6 @@ export async function finishBuy(req, res) {
     try {
         const user = res.locals.user;
         let total = 0;
-        console.log(user.cart)
         nodeoutlook.sendEmail({
             auth: {
                 user: process.env.SHOP_EMAIL,
