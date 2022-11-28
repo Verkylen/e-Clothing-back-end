@@ -14,6 +14,7 @@ export async function signUp(req, res) {
             ...req.body,
             "profilePicture": req.file
         };
+        console.log(req);
 
         const validation = newUserSchema.validate(user);        
         console.log(user);
@@ -49,8 +50,7 @@ export async function signIn(req, res) {
         delete requiredUser.password;
         delete requiredUser._id;
 
-        const token = jsonwebtoken.sign(requiredUser, process.env.JWT_KEY, {expiresIn: (user.keepLogged ? "365 days" : "1h")});
-        console.log(user);
+        const token = jsonwebtoken.sign({"email": requiredUser.email}, process.env.JWT_KEY, {expiresIn: (user.keepLogged ? "1000d" : "1h")});
         res.send({
             "username": requiredUser.username,
             "profilePicture": requiredUser.profilePicture,
@@ -66,9 +66,11 @@ export async function signIn(req, res) {
 export async function getCart(req, res) {
     try {
         const user = res.locals.user;
+        console.log(user)
         res.send(user.cart);
     }
     catch(e) {
         res.status(500).send(e.message);
+        console.log(e.message);
     }
 }
