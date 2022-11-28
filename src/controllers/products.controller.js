@@ -46,13 +46,13 @@ export async function addToCart(req, res) {
         const details = req.body;
         const validation = productsSchemas.validate(details);
         if(validation.error)
-            return res.status(422).send("Corpo do body inválido");
+            return res.status(422).send(`Corpo do body inválido ${validation.error.message}`);
 
         const user = res.locals.user;
 
         const requiredProduct = await productsCollection.findOne({_id : ObjectID(productId)});
         const userHasProduct = user.cart.findIndex(value => {
-            return value._id === ObjectID(productId) &&
+            return value._id.toString() === productId &&
                    value.color === details.color &&
                    value.size === details.size
         })
