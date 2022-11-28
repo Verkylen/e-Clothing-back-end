@@ -53,6 +53,7 @@ export async function signIn(req, res) {
         const token = jsonwebtoken.sign({"email": requiredUser.email}, process.env.JWT_KEY, {expiresIn: (user.keepLogged ? "1000d" : "1h")});
         res.send({
             "username": requiredUser.username,
+            "email": requiredUser.email,
             "profilePicture": requiredUser.profilePicture,
             "sessionId": token
         })
