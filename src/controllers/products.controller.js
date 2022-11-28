@@ -23,6 +23,7 @@ export async function getCategory(req, res) {
     try {
         let search = req.query.search;
         const category = req.params.category;
+        console.log(req.body)
 
         const products = await productsCollection.find({category: category}).toArray();
         if(!search)
@@ -45,6 +46,7 @@ export async function addToCart(req, res) {
         const productId = req.params.id;
         const details = req.body;
         const validation = productsSchemas.validate(details);
+        console.log(details);
         if(validation.error)
             return res.status(422).send(`Corpo do body inválido ${validation.error.message}`);
 
@@ -67,6 +69,35 @@ export async function addToCart(req, res) {
                 ...details
             })
         }
+
+        await usersCollection.updateOne({_id: user._id}, {$set: user});
+        res.send("OK");
+    }
+    catch(e) {
+        console.log(e)
+        res.status(500).send(e);
+    }
+
+}
+
+export async function deleteFromCart(req, res) {
+    try {
+        
+        const productId = req.params.id;
+        const details = req.body;
+
+        const validation = productsSchemas.validate(details);
+        if(validation.error)
+            return res.status(422).send(`Corpo do body inválido ${validation.error.message}`);
+
+        const user = res.locals.user;
+
+        const newCart = user.cart.filter(value => {
+            return value._id.toString() !== productId ||
+                   value.color !== details.color ||
+                   value.size !== details.size
+        })
+        user.cart = newCart;
 
         await usersCollection.updateOne({_id: user._id}, {$set: user});
         res.send("OK");
