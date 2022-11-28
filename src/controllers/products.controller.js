@@ -1,4 +1,5 @@
 import { ObjectID } from "bson";
+import { application } from "express";
 import { productsCollection, usersCollection } from "../database/db.js";
 
 export async function getProducts(req, res) {
@@ -42,26 +43,33 @@ export async function addToCart(req, res) {
     try {
         
         const productId = req.params.id;
+        const details = req.body;
         const user = res.locals.user;
-        
-        const product = user.cart.find(value => value._id === ObjectID(productId))
-        if(product) {
-            product.amount += req.body.amount;
-            if(product.amount <= 0)
-                return res.status(403).send("Caso queira retirar o produto do carrinho, use o botão de deletar");
-            user.cart.forEach(value => {if(value._id === product._id) value.amount = product.amount}) 
+
+        const requiredProduct = await productsCollection.findOne({_id : ObjectID(productId)});
+        const userHasProduct = user.cart.findIndex(value => {
+            return value._id === productId(productId) &&
+                   value.color === details.color &&
+                   value.size === details.size
+        })
+
+        if(userHasProduct !== -1) {
+            user.cart[userHasProduct].amount += details.amount;
+            if(user.cart[userHasProduct].amount <= 0) 
+                return res.status(401).send("Caso queira deletar o produto, use o botão de delete.");
         }
         else {
-            const newProduct = await productsCollection.findOne({_id: ObjectID(productId)});
-            newProduct.amount = 1;
-            user.cart.push(newProduct);
+            user.cart.push({
+                ...requiredProduct,
+                ...details
+            })
         }
 
-        usersCollection.updateOne({_id: user._id}, {$set: user})
-        res.send("OK");
+        await usersCollection.updateOne({_id: user._id}, {$set: user});
+
     }
     catch(e) {
         res.status(500).send(e);
-        console.log(e);
     }
+
 }
