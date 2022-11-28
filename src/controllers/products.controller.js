@@ -48,11 +48,11 @@ export async function addToCart(req, res) {
 
         const requiredProduct = await productsCollection.findOne({_id : ObjectID(productId)});
         const userHasProduct = user.cart.findIndex(value => {
-            return value._id === productId(productId) &&
+            return value._id === ObjectID(productId) &&
                    value.color === details.color &&
                    value.size === details.size
         })
-
+        console.log("Hi")
         if(userHasProduct !== -1) {
             user.cart[userHasProduct].amount += details.amount;
             if(user.cart[userHasProduct].amount <= 0) 
@@ -66,9 +66,10 @@ export async function addToCart(req, res) {
         }
 
         await usersCollection.updateOne({_id: user._id}, {$set: user});
-
+        res.send("OK");
     }
     catch(e) {
+        console.log(e)
         res.status(500).send(e);
     }
 
