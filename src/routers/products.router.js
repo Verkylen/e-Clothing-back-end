@@ -8,5 +8,4 @@ productsRouter.get("/products", getProducts);
 productsRouter.get("/products/:category", getCategory);
 productsRouter.post("/products/:id", validateUser, addToCart);
 
-
 export default productsRouter;
