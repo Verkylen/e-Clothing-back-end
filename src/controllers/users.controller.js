@@ -8,7 +8,7 @@ dotenv.config();
 export async function signUp(req, res) {
     try {
         if(!req.file)
-            res.status(422).send("Coloque uma foto de perfil válida")
+            return res.status(422).send("Coloque uma foto de perfil válida")
 
         const user = {
             ...req.body,
@@ -22,11 +22,11 @@ export async function signUp(req, res) {
     
         const previousUser = await usersCollection.findOne({"email": user.email});
         if(previousUser)
-            res.status(403).send("Email de usuário já cadastrado. Faça login.")
+            return res.status(403).send("Email de usuário já cadastrado. Faça login.")
 
         delete user.repeatPassword;
         user.password = await bcrypt.hash(req.body.password, 10);
-        usersCollection.insertOne(user);
+        usersCollection.insertOne({...user, "cart": [], "liked": []});
         res.send("OK")
     }
     catch(e) {
@@ -63,3 +63,12 @@ export async function signIn(req, res) {
     }
 }
 
+export async function getCart(req, res) {
+    try {
+        const user = res.locals.user;
+        res.send(user.cart);
+    }
+    catch(e) {
+        res.status(500).send(e.message);
+    }
+}
