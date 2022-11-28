@@ -3,6 +3,8 @@ import { newUserSchema, userSchema } from "../schemas/users.schemas.js"
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
+const nodeoutlook = await import('nodejs-nodemailer-outlook')
+
 dotenv.config();
 
 export async function signUp(req, res) {
@@ -73,5 +75,47 @@ export async function getCart(req, res) {
     catch(e) {
         res.status(500).send(e.message);
         console.log(e.message);
+    }
+}
+
+export async function finishBuy(req, res) {
+    try {
+        const user = res.locals.user;
+        let total = 0;
+        console.log(user.cart)
+        nodeoutlook.sendEmail({
+            auth: {
+                user: process.env.SHOP_EMAIL,
+                pass: process.env.SHOP_EMAIL_PASSWORD
+            },
+            from: 'eclothingoficial@gmail.com',
+            to: user.email,
+            subject: "[E-Clothing] Compra finalizada!",
+            html: `
+            <h1> [E-Clothing] Sua compra foi finalizada, confirme os itens </h1>
+            ${user.cart.map(value => {
+                total += value.price * value.amount
+                return `
+                <section style="display:flex">
+                    <img style="width:150px; height: 150px" src=${value.image} alt=""/>
+                    <div style="margin-left: 20px">
+                        <p>${value.name}</p>
+                        <p>Quantidade: <strong>${value.amount}</strong></p>
+                        <p>Valor: <strong>${value.amount} × R$${Number(value.price).toFixed(2)} = R$${value.price * value.amount}</strong></p>
+                    </div>
+                </section>`
+            })}
+            <h2> TOTAL: R$${total}</h2>
+            `,
+            onError: (e) => console.log(e),
+            onSuccess: (i) => console.log(i)
+        });
+        res.send(user.cart);
+        user.cart = [];
+        usersCollection.updateOne({_id: user._id}, {$set: user});
+    }
+    catch(e) {
+        console.log(e);
+        res.status(500).send(e)
     }
 }

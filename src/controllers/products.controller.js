@@ -52,7 +52,6 @@ export async function addToCart(req, res) {
                    value.color === details.color &&
                    value.size === details.size
         })
-        console.log("Hi")
         if(userHasProduct !== -1) {
             user.cart[userHasProduct].amount += details.amount;
             if(user.cart[userHasProduct].amount <= 0) 
